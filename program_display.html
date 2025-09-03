@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>شاشة العرض – برنامج الحفلة</title>
+  <style>
+    :root{--bg:#0b0e14;--card:#121826;--muted:#9aa3b2;--green:#19c37d;--red:#ff4d4f;--amber:#ffb020}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:#e6e9ef}
+    header{padding:14px 20px;border-bottom:1px solid #1e2635;display:flex;justify-content:space-between;align-items:center}
+    .clock{font-variant-numeric:tabular-nums;color:#cbd2e1}
+    main{max-width:1100px;margin:18px auto;padding:0 18px}
+    .item{background:var(--card);border:1px solid #1e2635;border-radius:12px;padding:14px;margin:10px 0;display:grid;grid-template-columns:60% 40%;gap:10px;align-items:center}
+    .title{font-weight:700;font-size:26px}
+    .status{font-size:14px;color:var(--muted);margin-top:6px}
+    .timer{font-size:40px;font-weight:800;text-align:end}
+    .state{display:inline-block;padding:6px 10px;border-radius:20px;border:1px solid #273042;margin-top:8px}
+    .upcoming .state{color:#cfe3ff}
+    .active .state{color:#9ef0c3;border-color:#235a42}
+    .done .state{color:#ffb3b3;border-color:#532424}
+    .active{outline:2px solid rgba(25,195,125,.25)}
+    .done{outline:2px solid rgba(255,77,79,.25)}
+    .muted{color:var(--muted)}
+    footer{opacity:.65;text-align:center;margin:20px 0;color:var(--muted);font-size:12px}
+  .logo {
+  width: 60px;
+  height: 60px;
+  margin-left: 10px;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div>🎉 برنامج الحفلة</div>
+    <div class="clock" id="clock"></div>
+    <img src="https://github.com/adamtamer2022/image/blob/main/1.png?raw=true" alt="Logo" class="logo">
+  </header>
+  <main id="wrap"></main>
+  <!-- Firebase SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAVzRmVlUcyXsg25KM26_wJs-QMuF52k2o",
+    authDomain: "frist-3a4ee.firebaseapp.com",
+    databaseURL: "https://frist-3a4ee-default-rtdb.firebaseio.com",
+    projectId: "frist-3a4ee",
+    storageBucket: "frist-3a4ee.appspot.com",
+    messagingSenderId: "1098758189245",
+    appId: "1:1098758189245:web:dddd9e453767b7629387d4",
+    measurementId: "G-K9JNSJPXXN"
+  };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const refSessions = db.ref('program/sessions');
+
+    const wrap = document.getElementById('wrap');
+
+    // Live clock
+    const clock = document.getElementById('clock');
+    setInterval(()=>{
+      const d = new Date();
+      clock.textContent = d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    }, 500);
+
+    const fmt = (s)=>{
+      s = Math.floor(s);
+      const sign = s<0 ? '-' : '';
+      s = Math.abs(s);
+      const h = Math.floor(s/3600);
+      const m = Math.floor((s%3600)/60);
+      const sec = s%60;
+      const body = (h>0? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
+                         : `${m}:${String(sec).padStart(2,'0')}`);
+      return sign + body;
+    };
+
+    function render(data){
+      wrap.innerHTML='';
+      const items = Object.values(data||{}).sort((a,b)=> (a.order||0)-(b.order||0));
+      items.forEach(s=>{
+        const div = document.createElement('div');
+        div.className = 'item ' + (s.status||'upcoming');
+        const title = document.createElement('div');
+        title.innerHTML = `<div class="title">${s.title||''}</div>
+                           <div class="status"><span class="state">${
+                              s.status==='active'?'قيد التنفيذ'
+                              : s.status==='done'?'انتهت'
+                              : s.status==='paused'?'متوقفة مؤقتًا'
+                              : 'قادمة'}</span>
+                              &nbsp; <span class="muted">المدة الأصلية: ${Math.round((s.durationSec||0)/60)} د</span>
+                           </div>`;
+        const timer = document.createElement('div');
+        timer.className = 'timer';
+        timer.id = 't_'+s.id;
+        timer.textContent = '—';
+        div.append(title,timer);
+        wrap.appendChild(div);
+      });
+      tick(data);
+    }
+
+    let lastData = {};
+    refSessions.on('value', snap=>{
+      lastData = snap.val()||{};
+      render(lastData);
+    });
+
+    function tick(data){
+      const start = Date.now();
+      function frame(){
+        const now = Date.now();
+        Object.values(data||{}).forEach(s=>{
+          const el = document.getElementById('t_'+s.id);
+          if(!el) return;
+          let rem = s.remainingSec || (s.durationSec||0);
+          if(s.status==='active' && s.endsAt){
+            rem = Math.floor((s.endsAt - now)/1000);
+          }
+          if(s.status==='done'){ rem = 0; }
+          el.textContent = fmt(rem);
+          // if overtime show negative in red (already styled by .done if admin أنهى)
+          if(s.status==='active' && rem<=0){
+            el.style.color = '#ffb3b3';
+          } else {
+            el.style.color = '#e6e9ef';
+          }
+        });
+        requestAnimationFrame(frame);
+      }
+      frame();
+    }
+  </script>
+</body>
+</html>
