@@ -23,8 +23,8 @@
     flex-grow: 1; 
     display: flex; 
     flex-direction: column; 
-    justify-content: center; /* يخلي الكراسي في نصف الشاشة عمودي */
-    align-items: center; /* يخليها في المنتصف أفقي */
+    justify-content: center;
+    align-items: center;
   }
 
   .screen {
@@ -39,12 +39,15 @@
     font-size: 18px;
     font-weight: bold;
     color: #ccc;
-    margin-bottom: 60px; /* 10 سم تقريباً */
+    margin-bottom: 60px;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
   }
 
   .row { 
     margin: 10px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .seat {
@@ -113,6 +116,26 @@
     text-align: center;
     font-size: 14px;
   }
+
+  /* ترتيب خاص للصفوف */
+  .seat-container {
+    display: grid;
+    grid-template-columns: repeat(6, 60px);
+    grid-template-rows: repeat(2, 60px);
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* تحديد مواقع المقاعد في الشبكة */
+  .seat-A1 { grid-column: 1; grid-row: 1; }
+  .seat-A2 { grid-column: 1; grid-row: 2; }
+  .seat-A3 { grid-column: 2; grid-row: 2; }
+  .seat-A4 { grid-column: 3; grid-row: 2; }
+  .seat-A5 { grid-column: 4; grid-row: 2; }
+  .seat-A6 { grid-column: 5; grid-row: 2; }
+  .seat-A7 { grid-column: 6; grid-row: 2; }
+  .seat-A8 { grid-column: 6; grid-row: 1; }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
@@ -163,88 +186,84 @@
 
   const hall = document.getElementById("hall");
 
-  // تحديد المقاعد الخاصة
-  const specialSeats = ["B1", "B2", "B3", "B4", "B5", "B6"];
+  // إنشاء حاوية للمقاعد باستخدام Grid
+  const seatsContainer = document.createElement("div");
+  seatsContainer.className = "seat-container";
 
-  // رسم الكراسي
-  // الصف الأول: A1 إلى A7
-  const firstRowDiv = document.createElement("div");
-  firstRowDiv.className = "row";
-  for (let i=1; i<=7; i++) {
-    const seat = document.createElement("div");
-    seat.className = "seat";
-    const seatId = "A" + i;
-    seat.setAttribute("data-id", seatId);
-    seat.textContent = seatId;
-    firstRowDiv.appendChild(seat);
+  // إنشاء جميع المقاعد
+  const seatA1 = document.createElement("div");
+  seatA1.className = "seat seat-A1";
+  seatA1.setAttribute("data-id", "A1");
+  seatA1.textContent = "A1";
 
-    const seatRef = ref(db, "seats/" + seatId);
-    onValue(seatRef, snapshot => {
-      if (snapshot.val() === "booked") {
-        seat.classList.add("booked");
-      } else {
-        seat.classList.remove("booked");
-      }
-    });
+  const seatA2 = document.createElement("div");
+  seatA2.className = "seat seat-A2";
+  seatA2.setAttribute("data-id", "A2");
+  seatA2.textContent = "A2";
 
-    seat.addEventListener("click", () => {
-      const booked = seat.classList.contains("booked");
-      set(seatRef, booked ? "free" : "booked");
-    });
-  }
-  hall.appendChild(firstRowDiv);
+  const seatA3 = document.createElement("div");
+  seatA3.className = "seat seat-A3";
+  seatA3.setAttribute("data-id", "A3");
+  seatA3.textContent = "A3";
 
-  // الصف الثاني: المقاعد الخاصة S1-S6 + A8
-  const secondRowDiv = document.createElement("div");
-  secondRowDiv.className = "row";
-  
-  // إضافة المقاعد الخاصة S1-S6 أولاً
-  for (let i=1; i<=0; i++) {
-    const seat = document.createElement("div");
-    seat.className = "seat special";
-    const seatId = "B" + i;
-    seat.setAttribute("data-id", seatId);
-    seat.textContent = "S" + i;
-    secondRowDiv.appendChild(seat);
+  const seatA4 = document.createElement("div");
+  seatA4.className = "seat seat-A4";
+  seatA4.setAttribute("data-id", "A4");
+  seatA4.textContent = "A4";
 
-    const seatRef = ref(db, "seats/" + seatId);
-    onValue(seatRef, snapshot => {
-      if (snapshot.val() === "booked") {
-        seat.classList.add("booked");
-      } else {
-        seat.classList.remove("booked");
-      }
-    });
+  const seatA5 = document.createElement("div");
+  seatA5.className = "seat seat-A5";
+  seatA5.setAttribute("data-id", "A5");
+  seatA5.textContent = "A5";
 
-    seat.addEventListener("click", () => {
-      const booked = seat.classList.contains("booked");
-      set(seatRef, booked ? "free" : "booked");
-    });
-  }
+  const seatA6 = document.createElement("div");
+  seatA6.className = "seat seat-A6";
+  seatA6.setAttribute("data-id", "A6");
+  seatA6.textContent = "A6";
 
-  // إضافة A8 في النهاية
+  const seatA7 = document.createElement("div");
+  seatA7.className = "seat seat-A7";
+  seatA7.setAttribute("data-id", "A7");
+  seatA7.textContent = "A7";
+
   const seatA8 = document.createElement("div");
-  seatA8.className = "seat";
+  seatA8.className = "seat seat-A8";
   seatA8.setAttribute("data-id", "A8");
   seatA8.textContent = "A8";
-  secondRowDiv.appendChild(seatA8);
 
-  const seatA8Ref = ref(db, "seats/A8");
-  onValue(seatA8Ref, snapshot => {
-    if (snapshot.val() === "booked") {
-      seatA8.classList.add("booked");
-    } else {
-      seatA8.classList.remove("booked");
-    }
+  // إضافة المقاعد للحاوية
+  seatsContainer.appendChild(seatA1);
+  seatsContainer.appendChild(seatA2);
+  seatsContainer.appendChild(seatA3);
+  seatsContainer.appendChild(seatA4);
+  seatsContainer.appendChild(seatA5);
+  seatsContainer.appendChild(seatA6);
+  seatsContainer.appendChild(seatA7);
+  seatsContainer.appendChild(seatA8);
+
+  hall.appendChild(seatsContainer);
+
+  // إضافة Firebase listeners وclick handlers لجميع المقاعد
+  const seats = [seatA1, seatA2, seatA3, seatA4, seatA5, seatA6, seatA7, seatA8];
+  const seatIds = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8"];
+
+  seats.forEach((seat, index) => {
+    const seatId = seatIds[index];
+    const seatRef = ref(db, "seats/" + seatId);
+    
+    onValue(seatRef, snapshot => {
+      if (snapshot.val() === "booked") {
+        seat.classList.add("booked");
+      } else {
+        seat.classList.remove("booked");
+      }
+    });
+
+    seat.addEventListener("click", () => {
+      const booked = seat.classList.contains("booked");
+      set(seatRef, booked ? "free" : "booked");
+    });
   });
-
-  seatA8.addEventListener("click", () => {
-    const booked = seatA8.classList.contains("booked");
-    set(seatA8Ref, booked ? "free" : "booked");
-  });
-
-  hall.appendChild(secondRowDiv);
 </script>
 </body>
 </html>
-
