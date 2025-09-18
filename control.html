@@ -127,15 +127,14 @@
     align-items: center;
   }
   
-  /* تحديد مواقع المقاعد في الشبكة */
+  /* تحديد مواقع المقاعد في الشبكة - مرتبة من A1 إلى A7 */
   .seat-A1 { grid-column: 1; grid-row: 1; }
   .seat-A2 { grid-column: 1; grid-row: 2; }
   .seat-A3 { grid-column: 2; grid-row: 2; }
   .seat-A4 { grid-column: 3; grid-row: 2; }
   .seat-A5 { grid-column: 4; grid-row: 2; }
   .seat-A6 { grid-column: 5; grid-row: 2; }
-  .seat-A7 { grid-column: 6; grid-row: 2; }
-  .seat-A8 { grid-column: 6; grid-row: 1; }
+  .seat-A7 { grid-column: 5; grid-row: 1; }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
@@ -190,7 +189,7 @@
   const seatsContainer = document.createElement("div");
   seatsContainer.className = "seat-container";
 
-  // إنشاء جميع المقاعد
+  // إنشاء جميع المقاعد - مرتبة من A1 إلى A7
   const seatA1 = document.createElement("div");
   seatA1.className = "seat seat-A1";
   seatA1.setAttribute("data-id", "A1");
@@ -226,11 +225,6 @@
   seatA7.setAttribute("data-id", "A7");
   seatA7.textContent = "A7";
 
-  const seatA8 = document.createElement("div");
-  seatA8.className = "seat seat-A8";
-  seatA8.setAttribute("data-id", "A8");
-  seatA8.textContent = "A8";
-
   // إضافة المقاعد للحاوية
   seatsContainer.appendChild(seatA1);
   seatsContainer.appendChild(seatA2);
@@ -239,13 +233,12 @@
   seatsContainer.appendChild(seatA5);
   seatsContainer.appendChild(seatA6);
   seatsContainer.appendChild(seatA7);
-  seatsContainer.appendChild(seatA8);
 
   hall.appendChild(seatsContainer);
 
   // إضافة Firebase listeners وclick handlers لجميع المقاعد
-  const seats = [seatA1, seatA2, seatA3, seatA4, seatA5, seatA6, seatA7, seatA8];
-  const seatIds = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8"];
+  const seats = [seatA1, seatA2, seatA3, seatA4, seatA5, seatA6, seatA7];
+  const seatIds = ["A1", "A2", "A3", "A4", "A5", "A6", "A7"];
 
   seats.forEach((seat, index) => {
     const seatId = seatIds[index];
