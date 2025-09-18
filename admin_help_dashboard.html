@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>لوحة التحكم - طلبات المساعدة</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  
+  body { 
+    margin: 0;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white; 
+    font-family: 'Arial', sans-serif; 
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .header h1 {
+    font-size: 2.5em;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  }
+
+  .stat-number {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin: 10px 0;
+  }
+
+  .stat-label {
+    font-size: 1.1em;
+    opacity: 0.8;
+  }
+
+  .help-requests-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .request-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 5px solid #3498db;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .request-card.urgent {
+    border-left-color: #e74c3c;
+    animation: pulse 2s infinite;
+  }
+
+  .request-card.help {
+    border-left-color: #f39c12;
+    animation: glow 3s infinite;
+  }
+
+  .request-card.other {
+    border-left-color: #9b59b6;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+  }
+
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(243, 156, 18, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(243, 156, 18, 0.8); }
+  }
+
+  .request-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .seat-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .seat-visual {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    animation: blink 1.5s infinite;
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+  }
+
+  .customer-info {
+    flex-grow: 1;
+  }
+
+  .customer-name {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .problem-type {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+  }
+
+  .type-problem { background: #e74c3c; }
+  .type-help { background: #f39c12; }
+  .type-other { background: #9b59b6; }
+
+  .timestamp {
+    font-size: 0.9em;
+    opacity: 0.7;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .action-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+  }
+
+  .resolve-btn {
+    background: #27ae60;
+    color: white;
+  }
+
+  .resolve-btn:hover {
+    background: #229954;
+    transform: translateY(-2px);
+  }
+
+  .delete-btn {
+    background: #e74c3c;
+    color: white;
+  }
+
+  .delete-btn:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    opacity: 0.7;
+  }
+
+  .empty-state .emoji {
+    font-size: 4em;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 10px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .filter-btn:hover,
+  .filter-btn.active {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+  }
+
+  .notification-sound {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  .sound-toggle {
+    background: none;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .sound-toggle:hover {
+    border-color: #3498db;
+    color: #3498db;
+  }
+
+  .sound-toggle.muted {
+    opacity: 0.5;
+  }
+</style>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+</head>
+<body>
+
+<div class="notification-sound">
+  <button class="sound-toggle" id="soundToggle" title="تفعيل/إيقاف الصوت">🔊</button>
+</div>
+
+<div class="header">
+  <h1>🎛️ لوحة تحكم طلبات المساعدة</h1>
+  <p>مراقبة ومتابعة طلبات مساعدة العملاء في الوقت الفعلي</p>
+</div>
+
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-number" id="totalRequests">0</div>
+    <div class="stat-label">إجمالي الطلبات</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="urgentRequests">0</div>
+    <div class="stat-label">طلبات عاجلة</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="helpRequests">0</div>
+    <div class="stat-label">طلبات مساعدة</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="otherRequests">0</div>
+    <div class="stat-label">طلبات أخرى</div>
+  </div>
+</div>
+
+<div class="help-requests-container">
+  <h2>📋 طلبات المساعدة النشطة</h2>
+  
+  <div class="filter-buttons">
+    <button class="filter-btn active" data-filter="all">الكل</button>
+    <button class="filter-btn" data-filter="مشكلة">المشاكل العاجلة</button>
+    <button class="filter-btn" data-filter="مساعدة">طلبات المساعدة</button>
+    <button class="filter-btn" data-filter="أخرى">طلبات أخرى</button>
+  </div>
+  
+  <div id="helpRequestsList">
+    <div class="empty-state">
+      <span class="emoji">😴</span>
+      <h3>لا توجد طلبات مساعدة حالياً</h3>
+      <p>ستظهر الطلبات هنا عند وصولها</p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getDatabase, ref, onValue, remove, update } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAVzRmVlUcyXsg25KM26_wJs-QMuF52k2o",
+    authDomain: "frist-3a4ee.firebaseapp.com",
+    databaseURL: "https://frist-3a4ee-default-rtdb.firebaseio.com",
+    projectId: "frist-3a4ee",
+    storageBucket: "frist-3a4ee.appspot.com",
+    messagingSenderId: "1098758189245",
+    appId: "1:1098758189245:web:dddd9e453767b7629387d4",
+    measurementId: "G-K9JNSJPXXN"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  let helpRequests = {};
+  let currentFilter = 'all';
+  let soundEnabled = true;
+
+  // مراقبة طلبات المساعدة
+  const helpRequestsRef = ref(db, 'helpRequests');
+  onValue(helpRequestsRef, (snapshot) => {
+    const data = snapshot.val();
+    helpRequests = data || {};
+    updateDisplay();
+    updateStats();
+    
+    // تشغيل صوت تنبيه للطلبات الجديدة
+    if (soundEnabled && Object.keys(helpRequests).length > 0) {
+      playNotificationSound();
+    }
+  });
+
+  // تحديث العرض
+  function updateDisplay() {
+    const container = document.getElementById('helpRequestsList');
+    const requests = Object.entries(helpRequests).filter(([key, request]) => 
+      request.status === 'pending'
+    );
+    
+    if (requests.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <span class="emoji">😴</span>
+          <h3>لا توجد طلبات مساعدة حالياً</h3>
+          <p>ستظهر الطلبات هنا عند وصولها</p>
+        </div>
+      `;
+      return;
+    }
+
+    // فلترة الطلبات
+    const filteredRequests = currentFilter === 'all' 
+      ? requests 
+      : requests.filter(([key, request]) => request.problemType === currentFilter);
+
+    if (filteredRequests.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <span class="emoji">🔍</span>
+          <h3>لا توجد طلبات للفلتر المحدد</h3>
+          <p>جرب فلتر آخر أو اختر "الكل"</p>
+        </div>
+      `;
+      return;
+    }
+
+    // ترتيب الطلبات حسب الوقت (الأحدث أولاً)
+    filteredRequests.sort(([,a], [,b]) => (b.timestamp || 0) - (a.timestamp || 0));
+
+    container.innerHTML = filteredRequests.map(([key, request]) => {
+      const timestamp = request.timestamp ? new Date(request.timestamp).toLocaleString('ar-EG') : 'غير محدد';
+      const typeClass = request.problemType === 'مشكلة' ? 'urgent' : 
+                       request.problemType === 'مساعدة' ? 'help' : 'other';
+      
+      const seatColor = request.problemType === 'مشكلة' ? '#e74c3c' : 
+                       request.problemType === 'مساعدة' ? '#f39c12' : '#9b59b6';
+
+      return `
+        <div class="request-card ${typeClass}" id="request-${key}">
+          <div class="request-header">
+            <div class="seat-info">
+              <div class="seat-visual" style="background: ${seatColor};">
+                ${request.seatId}
+              </div>
+              <div class="customer-info">
+                <div class="customer-name">👤 ${request.customerName}</div>
+                <span class="problem-type type-${request.problemType.toLowerCase()}">
+                  ${getProblemIcon(request.problemType)} ${request.problemType}
+                </span>
+              </div>
+            </div>
+            <div class="timestamp">⏰ ${timestamp}</div>
+          </div>
+          <div class="action-buttons">
+            <button class="action-btn resolve-btn" onclick="resolveRequest('${key}')">
+              ✅ تم الحل
+            </button>
+            <button class="action-btn delete-btn" onclick="deleteRequest('${key}')">
+              🗑️ حذف
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // تحديث الإحصائيات
+  function updateStats() {
+    const requests = Object.values(helpRequests).filter(req => req.status === 'pending');
+    
+    document.getElementById('totalRequests').textContent = requests.length;
+    document.getElementById('urgentRequests').textContent = 
+      requests.filter(req => req.problemType === 'مشكلة').length;
+    document.getElementById('helpRequests').textContent = 
+      requests.filter(req => req.problemType === 'مساعدة').length;
+    document.getElementById('otherRequests').textContent = 
+      requests.filter(req => req.problemType === 'أخرى').length;
+  }
+
+  // أيقونات المشاكل
+  function getProblemIcon(type) {
+    switch(type) {
+      case 'مشكلة': return '⚠️';
+      case 'مساعدة': return '🙋‍♂️';
+      case 'أخرى': return '💬';
+      default: return '❓';
+    }
+  }
+
+  // حل طلب المساعدة
+  window.resolveRequest = async function(requestId) {
+    try {
+      const requestRef = ref(db, `helpRequests/${requestId}`);
+      await update(requestRef, { 
+        status: 'resolved', 
+        resolvedAt: Date.now() 
+      });
+      
+      // إضافة تأثير بصري
+      const element = document.getElementById(`request-${requestId}`);
+      if (element) {
+        element.style.transform = 'scale(0.8)';
+        element.style.opacity = '0.5';
+        setTimeout(() => {
+          element.remove();
+        }, 300);
+      }
+    } catch (error) {
+      console.error('خطأ في حل الطلب:', error);
+      alert('❌ حدث خطأ أثناء حل الطلب');
+    }
+  }
+
+  // حذف طلب المساعدة
+  window.deleteRequest = async function(requestId) {
+    if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
+      return;
+    }
+    
+    try {
+      const requestRef = ref(db, `helpRequests/${requestId}`);
+      await remove(requestRef);
+      
+      // إضافة تأثير بصري
+      const element = document.getElementById(`request-${requestId}`);
+      if (element) {
+        element.style.transform = 'translateX(-100%)';
+        element.style.opacity = '0';
+        setTimeout(() => {
+          element.remove();
+        }, 300);
+      }
+    } catch (error) {
+      console.error('خطأ في حذف الطلب:', error);
+      alert('❌ حدث خطأ أثناء حذف الطلب');
+    }
+  }
+
+  // تشغيل صوت التنبيه
+  function playNotificationSound() {
+    try {
+      // إنشاء صوت تنبيه باستخدام Web Audio API
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+      console.log('لا يمكن تشغيل الصوت:', error);
+    }
+  }
+
+  // إدارة فلاتر العرض
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentFilter = this.dataset.filter;
+      updateDisplay();
+    });
+  });
+
+  // إدارة تبديل الصوت
+  document.getElementById('soundToggle').addEventListener('click', function() {
+    soundEnabled = !soundEnabled;
+    this.textContent = soundEnabled ? '🔊' : '🔇';
+    this.classList.toggle('muted', !soundEnabled);
+    this.title = soundEnabled ? 'إيقاف الصوت' : 'تفعيل الصوت';
+  });
+
+  // تحديث العرض كل ثانية للتأكد من التزامن
+  setInterval(updateDisplay, 1000);
+  
+</script>
+
+</body>
+</html>
