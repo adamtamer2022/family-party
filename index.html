@@ -53,30 +53,29 @@
   .legend-red { background: red; }
   .legend-gold { background: gold; }
 
-  .seat-container {
-    display: grid;
-    grid-template-columns: 60px 60px 60px;
-    grid-template-rows: 60px 60px 60px;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
-  }
+.seat-container {
+  display: grid;
+  grid-template-columns: 60px 60px 60px;
+  grid-template-rows: 60px 60px 60px;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
 
-  /* العمود الأول */
-  .seat-A1 { grid-column: 1; grid-row: 2; }
-  .seat-A2 { grid-column: 1; grid-row: 3; }
+/* الصف العلوي (A7, A8) */
+.seat-A7 { grid-column: 1; grid-row: 1; }
+.seat-A8 { grid-column: 2; grid-row: 1; }
 
-  /* الصف الأوسط */
-  .seat-A5 { grid-column: 2; grid-row: 2; }
-  .seat-A6 { grid-column: 3; grid-row: 2; }
+/* الصف الأوسط (A4, A5, A6) */
+.seat-A4 { grid-column: 1; grid-row: 2; }
+.seat-A5 { grid-column: 2; grid-row: 2; }
+.seat-A6 { grid-column: 3; grid-row: 2; }
 
-  /* الصف السفلي */
-  .seat-A3 { grid-column: 2; grid-row: 3; }
-  .seat-A4 { grid-column: 3; grid-row: 3; }
+/* الصف السفلي (A1, A2, A3) */
+.seat-A1 { grid-column: 1; grid-row: 3; }
+.seat-A2 { grid-column: 2; grid-row: 3; }
+.seat-A3 { grid-column: 3; grid-row: 3; }
 
-  /* الصف العلوي */
-  .seat-A7 { grid-column: 2; grid-row: 1; }
-  .seat-A8 { grid-column: 3; grid-row: 1; }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
